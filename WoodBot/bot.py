@@ -1,6 +1,7 @@
 
 import random
-import discord import tasks
+import discord
+from discord.ext import tasks
 import sqlite3
 from discord.ext import commands
 import io
@@ -595,8 +596,11 @@ class OrderModal(discord.ui.Modal, title="🪵 Wood Order Form"):
                 inline=False
             )
 
+seller_ping = seller_role.mention if seller_role else "@here"
+
+
         await channel.send(
-            f"🔔 <@&{seller_role.id}> New order opened!",
+            f"🔔 {seller_ping} New order opened!",
             embed=embed,
             view=CloseTicketView()
         )
