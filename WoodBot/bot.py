@@ -1,5 +1,6 @@
 
-import discord
+import random
+import discord import tasks
 import sqlite3
 from discord.ext import commands
 import io
@@ -181,6 +182,162 @@ def add_vouch(user_id):
     )
 
     db.commit()
+
+
+DEALS = {
+    0: [  # Monday
+        "🌳 MONDAY OAK SALE\nOak Wood 10% OFF Today Only",
+        "🌲 MONDAY SPECIAL\nElm Wood orders get priority queue"
+    ],
+
+    1: [  # Tuesday
+        "🍒 TUESDAY DEAL\nCherry Wood 15% OFF Today Only",
+        "🔥 TUESDAY BONUS\nLava Wood orders include bonus planks"
+    ],
+
+    2: [  # Wednesday
+        "🌲 MIDWEEK SPECIAL\nBirch Wood 10% OFF",
+        "🪵 WALNUT WEDNESDAY\nWalnut Wood available at reduced prices"
+    ],
+
+    3: [  # Thursday
+        "🌴 KOA THURSDAY\nKoa Wood priority delivery today",
+        "🌲 PINE DEAL\nPine Wood bulk orders get discounts"
+    ],
+
+    4: [  # Friday
+        "💎 FROST FRIDAY\nFrost Wood 15% OFF Today Only",
+        "🧟 ZOMBIE FRIDAY\nZombie Wood limited stock available"
+    ],
+
+    5: [  # Saturday
+        "🔥 PREMIUM SATURDAY\nBlue Spruce discounted today",
+        "👻 SPOOK SATURDAY\nSpook Wood available for limited time"
+    ],
+
+    6: [  # Sunday
+        "💀 SINISTER SUNDAY\nSinister Wood flash sale today",
+        "🌑 PHANTOM SUNDAY\nPhantom Wood priority orders enabled"
+    ]
+}
+
+
+@tasks.loop(hours=6)
+async def daily_deals():
+
+    current_day = datetime.datetime.now().weekday()
+
+    todays_deals = DEALS[current_day]
+
+    for guild in bot.guilds:
+
+        channel = discord.utils.get(
+            guild.text_channels,
+            name="🔥│daily-deals"
+        )
+
+        if channel:
+
+            deal = random.choice(todays_deals)
+
+            embed = discord.Embed(
+                title="🔥 Daily Deal",
+                description=deal,
+                color=discord.Color.orange()
+            )
+
+            await channel.send(embed=embed)
+
+
+@tasks.loop(minutes=10)
+async def update_stats():
+
+    for guild in bot.guilds:
+
+        channel = discord.utils.get(
+            guild.text_channels,
+            name="📊│stats"
+        )
+
+        if not channel:
+            continue
+
+        cursor.execute(
+            "SELECT SUM(orders), SUM(spent), SUM(vouches) FROM users"
+        )
+
+        data = cursor.fetchone()
+
+        total_orders = data[0] or 0
+        total_revenue = data[1] or 0
+        total_vouches = data[2] or 0
+
+        vip_role = discord.utils.get(
+            guild.roles,
+            name=VIP_ROLE
+        )
+
+        vip_count = len(vip_role.members) if vip_role else 0
+
+        open_tickets = 0
+
+        for c in guild.text_channels:
+            if c.name.startswith("ticket-"):
+                open_tickets += 1
+
+        embed = discord.Embed(
+            title="📊 Server Statistics",
+            color=discord.Color.blue(),
+            timestamp=datetime.datetime.now()
+        )
+
+        embed.add_field(
+            name="📦 Orders Completed",
+            value=str(total_orders),
+            inline=False
+        )
+
+        embed.add_field(
+            name="💰 Total Revenue",
+            value=f"{total_revenue:,}",
+            inline=False
+        )
+
+        embed.add_field(
+            name="⭐ Total Vouches",
+            value=str(total_vouches),
+            inline=False
+        )
+
+        embed.add_field(
+            name="👑 VIP Customers",
+            value=str(vip_count),
+            inline=False
+        )
+
+        embed.add_field(
+            name="🔥 Open Tickets",
+            value=str(open_tickets),
+            inline=False
+        )
+
+        try:
+
+            messages = [
+                message async for message in channel.history(limit=5)
+            ]
+
+            if messages:
+                await messages[0].edit(embed=embed)
+            else:
+                await channel.send(embed=embed)
+
+        except:
+            await channel.send(embed=embed)
+
+
+
+
 
 @bot.event
 async def on_member_join(member):
@@ -478,6 +635,7 @@ class TicketView(discord.ui.View):
     ):
         await interaction.response.send_modal(OrderModal())
 
+
 @bot.event
 async def on_ready():
 
@@ -490,8 +648,16 @@ async def on_ready():
         activity=discord.Game("Selling Premium Wood 🌲")
     )
 
+    if not daily_deals.is_running():
+        daily_deals.start()
+
+    if not update_stats.is_running():
+        update_stats.start()
+
     print(f"Synced {len(synced)} command(s)")
     print(f"Logged in as {bot.user}")
+
+
 
 
 @tree.command(name="setup", description="Post order panel")
