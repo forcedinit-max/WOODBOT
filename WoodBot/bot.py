@@ -7,6 +7,25 @@ import datetime
 
 import os
 
+
+from flask import Flask
+from threading import Thread
+
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "WoodBot is running!"
+
+def run_web():
+    app.run(host='0.0.0.0', port=10000)
+
+def keep_alive():
+    t = Thread(target=run_web)
+    t.start()
+
+
+
 TOKEN = os.getenv("TOKEN")
 
 OWNER_ID = 1361735588029399193
@@ -651,5 +670,6 @@ async def scam(
         f"🚫 {user.mention} marked as scammer."
     )
 
+keep_alive()
 bot.run(TOKEN)
 
