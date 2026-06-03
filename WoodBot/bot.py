@@ -173,23 +173,30 @@ def add_order(user_id, amount):
 
     db.commit()
 
+
 def add_vouch(user_id):
 
-    orders, spent, vouches = get_user_data(user_id)
+    cursor.execute(
+        """
+        INSERT OR IGNORE INTO users
+        (user_id, orders, spent, vouches)
+        VALUES (?, 0, 0, 0)
+        """,
+        (user_id,)
+    )
 
     cursor.execute(
         """
         UPDATE users
-        SET vouches = ?
+        SET vouches = vouches + 1
         WHERE user_id = ?
         """,
-        (
-            vouches + 1,
-            user_id
-        )
+        (user_id,)
     )
 
     db.commit()
+
+
 
 
 DEALS = {
