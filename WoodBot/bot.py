@@ -750,13 +750,6 @@ class SellerApplicationView(discord.ui.View):
                 "• Be removed from the seller team\n"
                 "• Receive the scammer role\n"
                 "• Be permanently blacklisted\n\n"
-
-                "Please answer the following:\n"
-                "• Age\n"
-                "• Timezone\n"
-                "• Experience selling wood\n"
-                "• Average daily activity\n"
-                "• Why should we choose you?"
             ),
             color=discord.Color.orange()
         )
@@ -998,7 +991,18 @@ async def rules(interaction: discord.Interaction):
         text="ShopWood"
     )
 
-    await interaction.response.send_message(embed=embed)
+ 
+await interaction.channel.send(
+    embed=embed,
+    view=TicketView()
+)
+
+await interaction.response.send_message(
+    "✅ Order panel posted.",
+    ephemeral=True
+)
+
+
 
 
 
