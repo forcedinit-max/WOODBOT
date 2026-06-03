@@ -649,6 +649,101 @@ class OrderModal(discord.ui.Modal, title="🪵 Wood Order Form"):
             f"✅ Ticket created: {channel.mention}",
             ephemeral=True
         )
+   
+class SellerApplicationView(discord.ui.View):
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="🛠️ Apply For Seller",
+        style=discord.ButtonStyle.blurple,
+        custom_id="persistent_seller_apply"
+    )
+    async def seller_apply(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        guild = interaction.guild
+
+        seller_role = discord.utils.get(
+            guild.roles,
+            name=SELLER_ROLE
+        )
+
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(
+                view_channel=False
+            ),
+
+            interaction.user: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            ),
+
+            guild.me: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+        }
+
+        if seller_role:
+            overwrites[seller_role] = discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+
+        category = discord.utils.get(
+            guild.categories,
+            name="admin"
+        )
+
+        channel = await guild.create_text_channel(
+            name=f"seller-app-{interaction.user.name.lower()}",
+            overwrites=overwrites,
+            category=category
+        )
+
+        embed = discord.Embed(
+            title="🛠️ Seller Application",
+            description=(
+                "Thank you for applying to become a seller.\n\n"
+
+                "### Expectations\n"
+                "• Be active and professional\n"
+                "• Deliver orders quickly\n"
+                "• Treat customers respectfully\n"
+                "• No trolling or fake promises\n\n"
+
+                "### Important\n"
+                "Scamming will NOT be tolerated.\n"
+                "Any seller caught scamming will:\n"
+                "• Be removed from the seller team\n"
+                "• Receive the scammer role\n"
+                "• Be permanently blacklisted\n\n"
+
+                "Please answer the following:\n"
+                "• Age\n"
+                "• Timezone\n"
+                "• Experience selling wood\n"
+                "• Average daily activity\n"
+                "• Why should we choose you?"
+            ),
+            color=discord.Color.orange()
+        )
+
+        await channel.send(
+            content=f"{interaction.user.mention}",
+            embed=embed,
+            view=CloseTicketView()
+        )
+
+        await interaction.response.send_message(
+            f"✅ Seller application created: {channel.mention}",
+            ephemeral=True
+        )
 
 class TicketView(discord.ui.View):
 
@@ -690,6 +785,7 @@ async def rotate_status():
 async def on_ready():
 
     bot.add_view(TicketView())
+    bot.add_view(SellerApplicationView())
     bot.add_view(CloseTicketView())
 
     synced = await tree.sync()
@@ -712,6 +808,36 @@ async def on_ready():
     print(f"Synced {len(synced)} command(s)")
     print(f"Logged in as {bot.user}")
 
+
+
+@tree.command(
+    name="sellerpanel",
+    description="Post seller application panel"
+)
+async def sellerpanel(interaction: discord.Interaction):
+
+    if not is_owner(interaction):
+        return
+
+    embed = discord.Embed(
+        title="🛠️ Apply To Be A Seller",
+        description=(
+            "Want to join the seller team?\n\n"
+            "Open a ticket below and apply.\n\n"
+            "Trusted and active sellers only."
+        ),
+        color=discord.Color.orange()
+    )
+
+    await interaction.channel.send(
+        embed=embed,
+        view=SellerApplicationView()
+    )
+
+    await interaction.response.send_message(
+        "✅ Seller panel posted.",
+        ephemeral=True
+    )
 
 
 
