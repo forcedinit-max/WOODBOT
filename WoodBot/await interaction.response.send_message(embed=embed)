@@ -1000,12 +1000,6 @@ async def rules(interaction: discord.Interaction):
     )
 
  
-
-
-
-
-
-
 @tree.command(name="rewards", description="View rewards")
 async def rewards(interaction: discord.Interaction):
 
@@ -1017,19 +1011,48 @@ async def rewards(interaction: discord.Interaction):
         color=discord.Color.purple()
     )
 
+    
     embed.add_field(
         name="🚀 Booster Rewards",
-        value="2x Boost = 2 Free TLs",
+        value=(
+            "• 2x Boost = 2 Free TLs\n"
+            "• Priority support\n"
+            "• Exclusive role"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🏆 Loyalty Rewards",
+        value=(
+            "• 5 Orders = 10% Discount\n"
+            "• 10 Orders = VIP\n"
+            "• 25 Orders = Elite Customer\n"
+            "• 50 Orders = Legendary Buyer"
+        ),
         inline=False
     )
 
     embed.add_field(
-        name="🏆 Loyalty Rewards",
-        value="10 Orders = VIP",
+        name="🎉 Event Rewards",
+        value=(
+            "• Random Giveaways\n"
+            "• Flash Sales\n"
+            "• Daily Deals"
+        ),
         inline=False
     )
-
-    await interaction.response.send_message(embed=embed)
+    
+    
+        
+    await interaction.channel.send(
+        embed=embed,
+    )
+    
+    await interaction.response.send_message(
+        "✅ Rewards panel posted.",
+        ephemeral=True
+    )
 
 @tree.command(name="sales", description="View sales")
 async def sales(interaction: discord.Interaction):
