@@ -789,6 +789,65 @@ async def setup(interaction: discord.Interaction):
     )
 
 
+@tree.command(name="rules", description="Post server rules")
+async def rules(interaction: discord.Interaction):
+
+    if not is_owner(interaction):
+        return
+
+    embed = discord.Embed(
+        title="About the Server",
+        description=(
+            "The server follows rules set up by Discord's and Roblox's Terms of Use.\n\n"
+            "Guidelines mentioned here are covered in their most basic form. "
+            "Use common sense and respect all members."
+        ),
+        color=discord.Color.blue()
+    )
+
+    embed.add_field(
+        name="General Guidelines",
+        value=(
+            "[Discord Terms of Use](https://discord.com/terms)\n"
+            "[Roblox Terms of Use](https://en.help.roblox.com/hc/en-us/articles/115004647846-Roblox-Terms-of-Use)\n\n"
+
+            "**Treat members respectfully.** "
+            "Be polite to others; harassment or discriminatory behavior is not tolerated.\n\n"
+
+            "**No extreme profanity.** "
+            "Light swearing is allowed, but abuse may result in punishment.\n\n"
+
+            "**Portray yourself appropriately.** "
+            "Profiles should not contain offensive names or inappropriate content.\n\n"
+
+            "**No personal information.** "
+            "The privacy of members is extremely important.\n\n"
+
+            "**No advertising.** "
+            "Do not advertise servers or social media in chats or DMs.\n\n"
+
+            "**No NSFW or illegal content.** "
+            "Illegal activity or inappropriate discussions are forbidden.\n\n"
+
+            "**Do not leak content.** "
+            "Respect unreleased or private content.\n\n"
+
+            "**No suspicious files or media.** "
+            "Only safe embeddable files should be shared.\n\n"
+
+            "**Use common sense.** "
+            "Loopholes or rule bypassing will still be handled by staff."
+        ),
+        inline=False
+    )
+
+    embed.set_footer(
+        text="ShopWood"
+    )
+
+    await interaction.response.send_message(embed=embed)
+
+
 
 @tree.command(name="rewards", description="View rewards")
 async def rewards(interaction: discord.Interaction):
