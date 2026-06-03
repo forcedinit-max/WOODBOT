@@ -343,17 +343,44 @@ async def update_stats():
         except:
             await channel.send(embed=embed)
 
-
-
-
-
 @bot.event
 async def on_member_join(member):
 
-    customer_role = discord.utils.get(
+    role = discord.utils.get(
         member.guild.roles,
         name=CUSTOMER_ROLE
     )
+
+    if role:
+        await member.add_roles(role)
+
+    try:
+
+        embed = discord.Embed(
+            title="🌲 Welcome To ShopWood",
+            description=(
+                f"Welcome {member.mention}!\n\n"
+
+                "🪵 Need wood?\n"
+                "Use the order panel to create a ticket.\n\n"
+
+                "⭐ Remember to vouch after successful orders.\n\n"
+
+                "🔥 Check:\n"
+                "• 📜・rules\n"
+                "• 💰・prices\n"
+                "• 🎁・rewards\n"
+                "• 🔥・daily-deals\n\n"
+
+                "Enjoy your stay!"
+            ),
+            color=discord.Color.green()
+        )
+
+        await member.send(embed=embed)
+
+    except:
+        pass
 
     if customer_role:
         await member.add_roles(customer_role)
