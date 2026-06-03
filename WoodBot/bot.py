@@ -413,214 +413,219 @@ class OrderModal(discord.ui.Modal, title="🪵 Wood Order Form"):
         max_length=1000
     )
 
-    async def on_submit(self, interaction: discord.Interaction):
-
-        guild = interaction.guild
-
-        if SCAMMER_ROLE.lower() in [
-            role.name.lower() for role in interaction.user.roles
-        ]:
-
-            await interaction.response.send_message(
-                "❌ You are blacklisted from ordering.",
-                ephemeral=True
-            )
-            return
-
-        open_tickets = 0
-
-        for channel in guild.text_channels:
-            if channel.name.startswith("ticket-"):
-                open_tickets += 1
-
-        queue_position = open_tickets + 1
-
-        if VIP_ROLE.lower() in [
-            role.name.lower() for role in interaction.user.roles
-        ]:
-            queue_position = max(1, queue_position - 2)
-
-        seller_role = discord.utils.get(
-            guild.roles,
-            name=SELLER_ROLE
-        )
-
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(
-                view_channel=False
-            ),
-            interaction.user: discord.PermissionOverwrite(
-                view_channel=True,
-                send_messages=True
-            ),
-            guild.me: discord.PermissionOverwrite(
-                view_channel=True,
-                send_messages=True
-            )
-        }
-
-        if seller_role:
-            overwrites[seller_role] = discord.PermissionOverwrite(
-                view_channel=True,
-                send_messages=True
-            )
-
-        category = discord.utils.get(
-            guild.categories,
-            name=ORDER_CATEGORY
-        )
-
-        channel = await guild.create_text_channel(
-            name=f"ticket-{interaction.user.name.lower()}",
-            overwrites=overwrites,
-            category=category
-        )
-
-        text = self.orders.value.lower()
-        words = text.split()
-
-        total_cost = 0
-        total_wait_minutes = 0
-        total_truckloads = 0
-        discount_used = False
-        order_summary = ""
-
-        i = 0
-
-        while i < len(words):
-
-            if words[i].isdigit():
-
-                quantity = int(words[i])
-
-                total_truckloads += quantity
-
-                i += 1
-
-                wood_words = []
-
-                while i < len(words) and not words[i].isdigit():
-                    wood_words.append(words[i])
-                    i += 1
-
-                wood_input = " ".join(wood_words)
-
-                matched_wood = None
-
-                for alias in WOOD_ALIASES:
-                    if alias in wood_input:
-                        matched_wood = WOOD_ALIASES[alias]
-                        break
-
-                if matched_wood:
-
-                    price = WOOD_PRICES[matched_wood] * quantity
-
-                    if quantity >= 5:
-                        price = int(price * 0.8)
-                        discount_used = True
-
-                    orders, spent, vouches = get_user_data(
-                        interaction.user.id
-                    )
-
-                    if orders >= 5:
-                        price = int(price * 0.9)
-
-                    total_cost += price
-
-                    total_wait_minutes += quantity * 30
-
-                    order_summary += (
-                        f"🪵 {matched_wood.title()} x{quantity} = {price:,}\n"
-                    )
-
-        if total_truckloads > 10:
-
-            await interaction.response.send_message(
-                "❌ Maximum of 10 truck loads per order.",
-                ephemeral=True
-            )
-
-            await channel.delete()
-            return
-
-        hours = total_wait_minutes // 60
-        minutes = total_wait_minutes % 60
-
-        embed = discord.Embed(
-            title="🧾 Wood Order",
-            color=discord.Color.green(),
-            timestamp=datetime.datetime.now()
-        )
-
-        embed.add_field(
-            name="📦 Orders",
-            value=order_summary,
-            inline=False
-        )
-
-        embed.add_field(
-            name="💰 Total Cost",
-            value=f"{total_cost:,}",
-            inline=False
-        )
-
-        embed.add_field(
-            name="📦 Queue Position",
-            value=f"You are #{queue_position} in queue",
-            inline=False
-        )
-
-        embed.add_field(
-            name="🕒 Estimated Wait",
-            value=f"{hours}h {minutes}m",
-            inline=False
-        )
-
-        if discount_used:
-            embed.add_field(
-                name="✅ Bulk Discount",
-                value="20% discount applied",
-                inline=False
-            )
-
-        orders, spent, vouches = get_user_data(
-            interaction.user.id
-        )
-
-        if orders >= 5:
-            embed.add_field(
-                name="🏆 Loyalty Discount",
-                value="10% repeat customer discount applied",
-                inline=False
-            )
-
-seller_ping = seller_role.mention if seller_role else "@here"
 
 
-        await channel.send(
-            f"🔔 {seller_ping} New order opened!",
-            embed=embed,
-            view=CloseTicketView()
-        )
+    
+     async def on_submit(self, interaction: discord.Interaction):
 
-        add_order(interaction.user.id, total_cost)
 
-        log_channel = discord.utils.get(
-            guild.text_channels,
-            name=LOG_CHANNEL_NAME
-        )
+    guild = interaction.guild
 
-        if log_channel:
-            await log_channel.send(
-                f"📜 {interaction.user} placed an order worth {total_cost:,}"
-            )
+    if SCAMMER_ROLE.lower() in [
+        role.name.lower() for role in interaction.user.roles
+    ]:
 
         await interaction.response.send_message(
-            f"✅ Ticket created: {channel.mention}",
+            "❌ You are blacklisted from ordering.",
             ephemeral=True
         )
+        return
+
+    open_tickets = 0
+
+    for channel in guild.text_channels:
+        if channel.name.startswith("ticket-"):
+            open_tickets += 1
+
+    queue_position = open_tickets + 1
+
+    if VIP_ROLE.lower() in [
+        role.name.lower() for role in interaction.user.roles
+    ]:
+        queue_position = max(1, queue_position - 2)
+
+    seller_role = discord.utils.get(
+        guild.roles,
+        name=SELLER_ROLE
+    )
+
+    overwrites = {
+        guild.default_role: discord.PermissionOverwrite(
+            view_channel=False
+        ),
+        interaction.user: discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True
+        ),
+        guild.me: discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True
+        )
+    }
+
+    if seller_role:
+        overwrites[seller_role] = discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True
+        )
+
+    category = discord.utils.get(
+        guild.categories,
+        name=ORDER_CATEGORY
+    )
+
+    channel = await guild.create_text_channel(
+        name=f"ticket-{interaction.user.name.lower()}",
+        overwrites=overwrites,
+        category=category
+    )
+
+    text = self.orders.value.lower()
+    words = text.split()
+
+    total_cost = 0
+    total_wait_minutes = 0
+    total_truckloads = 0
+    discount_used = False
+    order_summary = ""
+
+    i = 0
+
+    while i < len(words):
+
+        if words[i].isdigit():
+
+            quantity = int(words[i])
+
+            total_truckloads += quantity
+
+            i += 1
+
+            wood_words = []
+
+            while i < len(words) and not words[i].isdigit():
+                wood_words.append(words[i])
+                i += 1
+
+            wood_input = " ".join(wood_words)
+
+            matched_wood = None
+
+            for alias in WOOD_ALIASES:
+                if alias in wood_input:
+                    matched_wood = WOOD_ALIASES[alias]
+                    break
+
+            if matched_wood:
+
+                price = WOOD_PRICES[matched_wood] * quantity
+
+                if quantity >= 5:
+                    price = int(price * 0.8)
+                    discount_used = True
+
+                orders, spent, vouches = get_user_data(
+                    interaction.user.id
+                )
+
+                if orders >= 5:
+                    price = int(price * 0.9)
+
+                total_cost += price
+
+                total_wait_minutes += quantity * 30
+
+                order_summary += (
+                    f"🪵 {matched_wood.title()} x{quantity} = {price:,}\n"
+                )
+
+    if total_truckloads > 10:
+
+        await interaction.response.send_message(
+            "❌ Maximum of 10 truck loads per order.",
+            ephemeral=True
+        )
+
+        await channel.delete()
+        return
+
+    hours = total_wait_minutes // 60
+    minutes = total_wait_minutes % 60
+
+    embed = discord.Embed(
+        title="🧾 Wood Order",
+        color=discord.Color.green(),
+        timestamp=datetime.datetime.now()
+    )
+
+    embed.add_field(
+        name="📦 Orders",
+        value=order_summary,
+        inline=False
+    )
+
+    embed.add_field(
+        name="💰 Total Cost",
+        value=f"{total_cost:,}",
+        inline=False
+    )
+
+    embed.add_field(
+        name="📦 Queue Position",
+        value=f"You are #{queue_position} in queue",
+        inline=False
+    )
+
+    embed.add_field(
+        name="🕒 Estimated Wait",
+        value=f"{hours}h {minutes}m",
+        inline=False
+    )
+
+    if discount_used:
+        embed.add_field(
+            name="✅ Bulk Discount",
+            value="20% discount applied",
+            inline=False
+        )
+
+    orders, spent, vouches = get_user_data(
+        interaction.user.id
+    )
+
+    if orders >= 5:
+        embed.add_field(
+            name="🏆 Loyalty Discount",
+            value="10% repeat customer discount applied",
+            inline=False
+        )
+
+    seller_ping = seller_role.mention if seller_role else "@here"
+
+    await channel.send(
+        f"🔔 {seller_ping} New order opened!",
+        embed=embed,
+        view=CloseTicketView()
+    )
+
+    add_order(interaction.user.id, total_cost)
+
+    log_channel = discord.utils.get(
+        guild.text_channels,
+        name=LOG_CHANNEL_NAME
+    )
+
+    if log_channel:
+        await log_channel.send(
+            f"📜 {interaction.user} placed an order worth {total_cost:,}"
+        )
+
+    await interaction.response.send_message(
+        f"✅ Ticket created: {channel.mention}",
+        ephemeral=True
+    )
+
+
 
 class TicketView(discord.ui.View):
 
