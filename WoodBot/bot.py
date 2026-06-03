@@ -42,9 +42,9 @@ LUMBERJACK_ROLE = "⚒️ Lumberjack"
 ELITE_ROLE = "💠 Elite Customer"
 LEGENDARY_ROLE = "🐉 Legendary Buyer"
 
-LOG_CHANNEL_NAME = "order-logs"
-VOUCH_CHANNEL = "vouches"
-ORDER_CATEGORY = "Wood Orders"
+LOG_CHANNEL_NAME = "📜・order-logs"
+VOUCH_CHANNEL = "⭐・vouches"
+ORDER_CATEGORY = "🪵 Wood Orders"
 
 db = sqlite3.connect("woodbot.db")
 cursor = db.cursor()
