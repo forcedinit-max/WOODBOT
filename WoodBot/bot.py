@@ -234,7 +234,7 @@ async def daily_deals():
 
         channel = discord.utils.get(
             guild.text_channels,
-            name="🔥│daily-deals"
+            name="🔥・daily-deals"
         )
 
         if channel:
@@ -257,7 +257,7 @@ async def update_stats():
 
         channel = discord.utils.get(
             guild.text_channels,
-            name="📊│stats"
+            name="📊・stats"
         )
 
         if not channel:
