@@ -999,6 +999,16 @@ async def rules(interaction: discord.Interaction):
         text="ShopWood"
     )
 
+    await interaction.channel.send(
+        embed=embed,
+    )
+
+    await interaction.response.send_message(
+        "✅ Rules panel posted.",
+        ephemeral=True
+    )
+
+
  
 @tree.command(name="rewards", description="View rewards")
 async def rewards(interaction: discord.Interaction):
@@ -1010,7 +1020,7 @@ async def rewards(interaction: discord.Interaction):
         title="🎁 Server Rewards",
         color=discord.Color.purple()
     )
-
+    
     
     embed.add_field(
         name="🚀 Booster Rewards",
