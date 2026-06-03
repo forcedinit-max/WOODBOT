@@ -59,6 +59,13 @@ CREATE TABLE IF NOT EXISTS users (
 )
 """)
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS invites (
+    user_id INTEGER PRIMARY KEY,
+    invites INTEGER DEFAULT 0
+)
+""")
+
 db.commit()
 
 WOOD_PRICES = {
@@ -607,6 +614,27 @@ class OrderModal(discord.ui.Modal, title="🪵 Wood Order Form"):
 
         add_order(interaction.user.id, total_cost)
 
+    
+        orders, spent, vouches = get_user_data(
+            interaction.user.id
+        )
+
+        vip_role = discord.utils.get(
+            guild.roles,
+            name=VIP_ROLE
+        )
+
+        if orders >= 10 and vip_role:
+
+            if vip_role not in interaction.user.roles:
+
+                await interaction.user.add_roles(vip_role)
+
+                await channel.send(
+                    f"👑 {interaction.user.mention} unlocked VIP status!"
+                )
+
+
         log_channel = discord.utils.get(
             guild.text_channels,
             name=LOG_CHANNEL_NAME
@@ -639,6 +667,24 @@ class TicketView(discord.ui.View):
     ):
         await interaction.response.send_modal(OrderModal())
 
+STATUSES = [
+    "🌲 Selling Premium Wood",
+    "🪵 Processing Orders",
+    "🔥 Daily Deals Active",
+    "⭐ Use /vouch",
+    "💎 VIP Rewards Available"
+]
+
+@tasks.loop(minutes=5)
+async def rotate_status():
+
+    status = random.choice(STATUSES)
+
+    await bot.change_presence(
+        activity=discord.Game(status)
+    )
+
+
 
 @bot.event
 async def on_ready():
@@ -657,6 +703,11 @@ async def on_ready():
 
     if not update_stats.is_running():
         update_stats.start()
+
+    
+    if not rotate_status.is_running():
+        rotate_status.start()
+
 
     print(f"Synced {len(synced)} command(s)")
     print(f"Logged in as {bot.user}")
