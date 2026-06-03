@@ -929,10 +929,18 @@ async def setup(interaction: discord.Interaction):
         text="Press the button below to place an order"
     )
 
-    await interaction.response.send_message(
+   
+    await interaction.channel.send(
         embed=embed,
         view=TicketView()
     )
+
+    await interaction.response.send_message(
+        "✅ Order panel posted.",
+        ephemeral=True
+    )
+
+
 
 
 @tree.command(name="rules", description="Post server rules")
@@ -992,15 +1000,7 @@ async def rules(interaction: discord.Interaction):
     )
 
  
-await interaction.channel.send(
-    embed=embed,
-    view=TicketView()
-)
 
-await interaction.response.send_message(
-    "✅ Order panel posted.",
-    ephemeral=True
-)
 
 
 
