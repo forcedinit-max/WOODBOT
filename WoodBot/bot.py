@@ -50,7 +50,8 @@ REGULAR_ROLE = "🪵 Regular"
 LUMBERJACK_ROLE = "⚒️ Lumberjack"
 ELITE_ROLE = "💠 Elite Customer"
 LEGENDARY_ROLE = "🐉 Legendary Buyer"
-
+AXE_ORDER_CATEGORY = "🪓 Axe Orders"
+AXE_CHANNEL = "🪓・axe-prices"
 LOG_CHANNEL_NAME = "📜・order-logs"
 VOUCH_CHANNEL = "⭐・vouches"
 ORDER_CATEGORY = "🪵 Wood Orders"
@@ -832,6 +833,7 @@ async def on_ready():
     
     bot.add_view(TicketView())
     bot.add_view(SellerApplicationView())
+    bot.add_view(AxeTicketView())
     bot.add_view(ServiceTicketView())
     bot.add_view(CloseTicketView())
 
@@ -1108,6 +1110,18 @@ class ServiceTicketView(discord.ui.View):
     ):
 
         guild = interaction.guild
+        for channel in guild.text_channels:
+
+            if channel.name == f"service-{interaction.user.name.lower()}":
+
+                await interaction.response.send_message(
+                    "❌ You already have an open service ticket.",
+                    ephemeral=True
+                )
+
+                return
+
+
 
         seller_role = discord.utils.get(
             guild.roles,
@@ -1231,6 +1245,232 @@ async def servicepanel(interaction: discord.Interaction):
 
     await interaction.response.send_message(
         "✅ Service panel posted.",
+        ephemeral=True
+    )
+
+class AxeTicketView(discord.ui.View):
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="🪓 Order Axes",
+        style=discord.ButtonStyle.red,
+        custom_id="persistent_axe_ticket"
+    )
+    async def create_axe_ticket(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        guild = interaction.guild
+
+        for channel in guild.text_channels:
+
+            if channel.name == f"axe-{interaction.user.name.lower()}":
+
+                await interaction.response.send_message(
+                    "❌ You already have an open axe ticket.",
+                    ephemeral=True
+                )
+
+                return
+
+        seller_role = discord.utils.get(
+            guild.roles,
+            name=SELLER_ROLE
+        )
+
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(
+                view_channel=False
+            ),
+
+            interaction.user: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            ),
+
+            guild.me: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+        }
+
+        if seller_role:
+            overwrites[seller_role] = discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+
+        category = discord.utils.get(
+            guild.categories,
+            name=AXE_ORDER_CATEGORY
+        )
+
+        channel = await guild.create_text_channel(
+            name=f"axe-{interaction.user.name.lower()}",
+            overwrites=overwrites,
+            category=category
+        )
+
+        embed = discord.Embed(
+            title="🪓 Axe Order",
+            description=(
+                "Please explain:\n\n"
+                "• Which axe you want\n"
+                "• Gift / Boxed / Loose\n"
+                "• Quantity"
+            ),
+            color=discord.Color.red()
+        )
+
+        await channel.send(
+            content=f"{interaction.user.mention}",
+            embed=embed,
+            view=CloseTicketView()
+        )
+
+        await interaction.response.send_message(
+            f"✅ Axe ticket created: {channel.mention}",
+            ephemeral=True
+        )
+
+
+@tree.command(name="axepanel", description="Post axe panel")
+async def axepanel(interaction: discord.Interaction):
+
+    if not is_owner(interaction):
+        return
+
+    embed = discord.Embed(
+        title="🪓 LT2 Axe Prices",
+        description=(
+            "Premium axes available.\n"
+            "Gifted, boxed and loose variants."
+        ),
+        color=discord.Color.red()
+    )
+
+    embed.add_field(
+        name="🌿 Overgrown Axe",
+        value=(
+            "• Gift — 30k\n"
+            "• Boxed — 20k\n"
+            "• Loose — 10k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🔥 Fire Axe",
+        value=(
+            "• Gift — 20k\n"
+            "• Boxed — 20k\n"
+            "• Loose — 10k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🐷 Pig Axe",
+        value=(
+            "• Boxed — 25k\n"
+            "• Loose — 20k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="⏳ Endtimes Axe",
+        value=(
+            "• Boxed — 25k\n"
+            "• Loose — 15k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🪓 Many Axe",
+        value=(
+            "• Boxed — 25k\n"
+            "• Loose — 15k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🟠 Amber Axe",
+        value=(
+            "• Boxed — 30k\n"
+            "• Loose — 20k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🔄 Inverse Axe",
+        value=(
+            "• Gift — 45k\n"
+            "• Boxed — 35k\n"
+            "• Loose — 20k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🍬 Event Axes",
+        value=(
+            "• Candy Corn Axe — 15k\n"
+            "• Rukiry Axe — 10k\n"
+            "• Bird Axe — 10k\n"
+            "• Beta Axe — 15k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🎄 Seasonal Axes",
+        value=(
+            "• Gingerbread Axe\n"
+            "Gift — 30k | Boxed — 20k | Loose — 15k\n\n"
+
+            "• Frost Axe\n"
+            "Gift — 30k | Boxed — 20k | Loose — 10k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="⚒️ Utility Axes",
+        value=(
+            "• Chicken Axe\n"
+            "Gift — 25k | Boxed — 20k | Loose — 10k\n\n"
+
+            "• Refined Axe\n"
+            "Gift — 35k | Boxed — 20k | Loose — 10k\n\n"
+
+            "• Alpha Axe\n"
+            "Boxed — 15k | Loose — 10k\n\n"
+
+            "• Cave Axe\n"
+            "Gift — 30k | Boxed — 20k | Loose — 10k"
+        ),
+        inline=False
+    )
+
+    embed.set_footer(
+        text="Press the button below to order axes"
+    )
+
+    await interaction.channel.send(
+        embed=embed,
+        view=AxeTicketView()
+    )
+
+    await interaction.response.send_message(
+        "✅ Axe panel posted.",
         ephemeral=True
     )
 
