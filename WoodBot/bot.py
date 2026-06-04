@@ -1598,9 +1598,121 @@ class GiftPanelView(discord.ui.View):
 
         return embed
 
+    
+        @discord.ui.button(
+            label="⬅️",
+            style=discord.ButtonStyle.secondary,
+            custom_id="gift_previous_page"
+        )
+
+
+    )
+    async def previous_page(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        self.page = 1
+
+        await interaction.response.edit_message(
+            embed=self.get_embed(),
+            view=self
+        )
+
+
+    @discord.ui.button(
+        label="🎁 Order Gifts",
+        style=discord.ButtonStyle.green,
+        custom_id="gift_order_button"
+    )
+
+
+    async def order_gifts(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        guild = interaction.guild
+
+        for channel in guild.text_channels:
+
+            if channel.name == f"gift-{interaction.user.name.lower()}":
+
+                await interaction.response.send_message(
+                    "❌ You already have an open gift ticket.",
+                    ephemeral=True
+                )
+
+                return
+
+        seller_role = discord.utils.get(
+            guild.roles,
+            name=SELLER_ROLE
+        )
+
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(
+                view_channel=False
+            ),
+
+            interaction.user: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            ),
+
+            guild.me: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+        }
+
+        if seller_role:
+            overwrites[seller_role] = discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+
+        category = discord.utils.get(
+            guild.categories,
+            name=GIFT_ORDER_CATEGORY
+        )
+
+        channel = await guild.create_text_channel(
+            name=f"gift-{interaction.user.name.lower()}",
+            overwrites=overwrites,
+            category=category
+        )
+
+        embed = discord.Embed(
+            title="🎁 Gift Order",
+            description=(
+                "Please explain:\n\n"
+                "• Which gifts/items you want\n"
+                "• Gift / Boxed / Loose\n"
+                "• Quantity"
+            ),
+            color=discord.Color.purple()
+        )
+
+        await channel.send(
+            content=f"{interaction.user.mention}",
+            embed=embed,
+            view=CloseTicketView()
+        )
+
+        await interaction.response.send_message(
+            f"✅ Gift ticket created: {channel.mention}",
+            ephemeral=True
+        )
+
+   
+    
     @discord.ui.button(
         label="⬅️",
-        style=discord.ButtonStyle.secondary
+        style=discord.ButtonStyle.secondary,
+        custom_id="gift_previous_page"
     )
     async def previous_page(
         self,
@@ -1617,7 +1729,8 @@ class GiftPanelView(discord.ui.View):
 
     @discord.ui.button(
         label="🎁 Order Gifts",
-        style=discord.ButtonStyle.green
+        style=discord.ButtonStyle.green,
+        custom_id="gift_order_button"
     )
     async def order_gifts(
         self,
@@ -1700,7 +1813,8 @@ class GiftPanelView(discord.ui.View):
 
     @discord.ui.button(
         label="➡️",
-        style=discord.ButtonStyle.secondary
+        style=discord.ButtonStyle.secondary,
+        custom_id="gift_next_page"
     )
     async def next_page(
         self,
@@ -1714,6 +1828,8 @@ class GiftPanelView(discord.ui.View):
             embed=self.get_embed(),
             view=self
         )
+
+
 
 
 @tree.command(name="giftpanel", description="Post gift panel")
