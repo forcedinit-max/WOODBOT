@@ -1348,7 +1348,8 @@ async def axepanel(interaction: discord.Interaction):
         title="🪓 LT2 Axe Prices",
         description=(
             "Premium axes available.\n"
-            "Gifted, boxed and loose variants."
+            "Gifted, boxed and loose variants.\n" 
+            "💰 20% bulk discount on orders of 10+ axes."
         ),
         color=discord.Color.red()
     )
