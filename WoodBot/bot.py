@@ -1509,7 +1509,7 @@ class GiftPanelView(discord.ui.View):
             embed = discord.Embed(
                 title="🎁 LT2 Gifts (Page 1)",
                 description="Gifted and boxed collectibles.",
-                color=discord.Color.magenta()
+                color=discord.Color.purple()
             )
 
             embed.add_field(
@@ -1548,7 +1548,7 @@ class GiftPanelView(discord.ui.View):
             embed = discord.Embed(
                 title="🎁 LT2 Gifts (Page 2)",
                 description="Rare collectibles and vehicles.",
-                color=discord.Color.magenta()
+                color=discord.Color.purple()
             )
 
             embed.add_field(
@@ -1684,7 +1684,7 @@ class GiftPanelView(discord.ui.View):
                 "• Gift / Boxed / Loose\n"
                 "• Quantity"
             ),
-            color=discord.Color.magenta()
+            color=discord.Color.purple()
         )
 
         await channel.send(
