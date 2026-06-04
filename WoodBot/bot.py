@@ -44,7 +44,7 @@ SELLER_ROLE = "seller"
 SCAMMER_ROLE = "scammer"
 
 VIP_ROLE = "👑 VIP"
-
+SELLER_CATEGORY = "🛠️ Seller Apps"
 CUSTOMER_ROLE = "🌲 Customer"
 REGULAR_ROLE = "🪵 Regular"
 LUMBERJACK_ROLE = "⚒️ Lumberjack"
@@ -54,6 +54,12 @@ LEGENDARY_ROLE = "🐉 Legendary Buyer"
 LOG_CHANNEL_NAME = "📜・order-logs"
 VOUCH_CHANNEL = "⭐・vouches"
 ORDER_CATEGORY = "🪵 Wood Orders"
+WOOD_CHANNEL = "💰・wood-prices"
+GIFT_CHANNEL = "🎁・gift-prices"
+SERVICE_CHANNEL = "🛠️・service-prices"
+GIFT_ORDER_CATEGORY = "🎁 Gift Orders"
+SERVICE_ORDER_CATEGORY = "🛠️ Service Orders"
+
 
 db = sqlite3.connect("woodbot.db")
 cursor = db.cursor()
@@ -737,10 +743,13 @@ class SellerApplicationView(discord.ui.View):
                 send_messages=True
             )
 
-        category = discord.utils.get(
-            guild.categories,
-            name="admin"
-        )
+        
+            category = discord.utils.get(
+                guild.categories,
+                name=SELLER_CATEGORY
+            )
+
+
 
         channel = await guild.create_text_channel(
             name=f"seller-app-{interaction.user.name.lower()}",
@@ -819,8 +828,11 @@ async def rotate_status():
 @bot.event
 async def on_ready():
 
+   
+    
     bot.add_view(TicketView())
     bot.add_view(SellerApplicationView())
+    bot.add_view(ServiceTicketView())
     bot.add_view(CloseTicketView())
 
     synced = await tree.sync()
@@ -1078,6 +1090,150 @@ async def rewards(interaction: discord.Interaction):
         "✅ Rewards panel posted.",
         ephemeral=True
     )
+
+class ServiceTicketView(discord.ui.View):
+
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="🛠️ Order Service",
+        style=discord.ButtonStyle.blurple,
+        custom_id="persistent_service_ticket"
+    )
+    async def create_service_ticket(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        guild = interaction.guild
+
+        seller_role = discord.utils.get(
+            guild.roles,
+            name=SELLER_ROLE
+        )
+
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(
+                view_channel=False
+            ),
+
+            interaction.user: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            ),
+
+            guild.me: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+        }
+
+        if seller_role:
+            overwrites[seller_role] = discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+
+        category = discord.utils.get(
+            guild.categories,
+            name=SERVICE_ORDER_CATEGORY
+        )
+
+        channel = await guild.create_text_channel(
+            name=f"service-{interaction.user.name.lower()}",
+            overwrites=overwrites,
+            category=category
+        )
+
+        embed = discord.Embed(
+            title="🛠️ Service Order",
+            description=(
+                "Please explain:\n\n"
+                "• Which service you want\n"
+                "• Quantity\n"
+                "• Any extra details"
+            ),
+            color=discord.Color.orange()
+        )
+
+        await channel.send(
+            content=f"{interaction.user.mention}",
+            embed=embed,
+            view=CloseTicketView()
+        )
+
+        await interaction.response.send_message(
+            f"✅ Service ticket created: {channel.mention}",
+            ephemeral=True
+        )
+
+
+@tree.command(name="servicepanel", description="Post service panel")
+async def servicepanel(interaction: discord.Interaction):
+
+    if not is_owner(interaction):
+        return
+
+    embed = discord.Embed(
+        title="🛠️ LT2 Services",
+        description=(
+            "Professional Lumber Tycoon 2 services.\n"
+            "Trusted staff and fast completion."
+        ),
+        color=discord.Color.orange()
+    )
+
+    embed.add_field(
+        name="🏗️ Building Services",
+        value=(
+            "• Storage Containers — 50k per container\n"
+            "• Auto Wood Sorters — 80k per container\n"
+            "• 1x1 Unit Cutter — 150k\n"
+            "• Auto Vehicle Unloader — 200k\n"
+            "• Small Shop Build — 500k\n"
+            "• Large Shop Build — 2m"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🛒 Purchasing Services",
+        value=(
+            "• Normal Wires — 200k per truckload\n"
+            "• Neon Wires — 400k per truckload\n"
+            "• Glass — 100k per truckload\n\n"
+            "Truckloads of conveyors, trucks and other items\n"
+            "can be discussed in a ticket."
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🔧 Misc Services",
+        value=(
+            "• Help Getting Golden Blueprint — 50k\n"
+            "• Fill Blueprints — 150k\n\n"
+            "❌ No discounts available for services."
+        ),
+        inline=False
+    )
+
+    embed.set_footer(
+        text="Press the button below to order services"
+    )
+
+    await interaction.channel.send(
+        embed=embed,
+        view=ServiceTicketView()
+    )
+
+    await interaction.response.send_message(
+        "✅ Service panel posted.",
+        ephemeral=True
+    )
+
 
 @tree.command(name="sales", description="View sales")
 async def sales(interaction: discord.Interaction):
