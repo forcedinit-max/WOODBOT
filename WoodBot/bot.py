@@ -1606,7 +1606,7 @@ class GiftPanelView(discord.ui.View):
         )
 
 
-    )
+    
     async def previous_page(
         self,
         interaction: discord.Interaction,
