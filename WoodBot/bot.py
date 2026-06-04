@@ -1364,6 +1364,26 @@ async def axepanel(interaction: discord.Interaction):
         inline=False
     )
 
+
+    embed.add_field(
+        name="🍃 Spearmint Axe",
+        value=(
+            "• Boxed — 20k\n"
+            "• Loose — 10k"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🍬 Candy Cane Axe",
+        value=(
+            "• Gift — 30k\n"
+            "• Boxed — 20k\n"
+            "• Loose — 10k"
+        ),
+        inline=False
+    )
+
     embed.add_field(
         name="🔥 Fire Axe",
         value=(
