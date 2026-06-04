@@ -834,6 +834,7 @@ async def on_ready():
     bot.add_view(TicketView())
     bot.add_view(SellerApplicationView())
     bot.add_view(AxeTicketView())
+    bot.add_view(GiftPanelView())
     bot.add_view(ServiceTicketView())
     bot.add_view(CloseTicketView())
 
@@ -1492,6 +1493,244 @@ async def axepanel(interaction: discord.Interaction):
 
     await interaction.response.send_message(
         "✅ Axe panel posted.",
+        ephemeral=True
+    )
+
+class GiftPanelView(discord.ui.View):
+
+    def __init__(self, page=1):
+        super().__init__(timeout=None)
+        self.page = page
+
+    def get_embed(self):
+
+        if self.page == 1:
+
+            embed = discord.Embed(
+                title="🎁 LT2 Gifts (Page 1)",
+                description="Gifted and boxed collectibles.",
+                color=discord.Color.magenta()
+            )
+
+            embed.add_field(
+                name="🎄 Holiday Gifts",
+                value=(
+                    "• Coal\nGift — 35k | Boxed — 25k\n\n"
+                    "• Red Candy Cane\nGift — 45k | Boxed — 10k\n\n"
+                    "• Candy Cane Axe\nGift — 30k | Boxed — 20k\n\n"
+                    "• Spearmint Axe\nBoxed — 20k | Loose — 10k"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name="🎲 Collectibles",
+                value=(
+                    "• D10\nGift — 60k | Boxed — 40k\n\n"
+                    "• Die\nGift — 60k | Boxed — 25k\n\n"
+                    "• Bowl\nGift — 30k | Boxed — 20k"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name="🎃 Seasonal Items",
+                value=(
+                    "• Purple Glowing Pumpkin — 35k\n"
+                    "• Melon Pumpkin — 25k\n"
+                    "• Very Large Pumpkin — 500k"
+                ),
+                inline=False
+            )
+
+        else:
+
+            embed = discord.Embed(
+                title="🎁 LT2 Gifts (Page 2)",
+                description="Rare collectibles and vehicles.",
+                color=discord.Color.magenta()
+            )
+
+            embed.add_field(
+                name="🧸 Rare Collectibles",
+                value=(
+                    "• Spork\nGift — 30k | Boxed — 25k\n\n"
+                    "• Frankensign Book\nGift — 15k | Boxed — 12k\n\n"
+                    "• Burger Cola\nGift — 20k | Boxed — 15k\n\n"
+                    "• Traffic Cone\nGift — 25k | Boxed — 15k"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name="🔮 Special Items",
+                value=(
+                    "• Void Entity — 25k\n"
+                    "• Bridge Eye — 50k\n"
+                    "• Golden Toilet\nGift — 40k | Boxed — 30k"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name="⚽ Balls",
+                value=(
+                    "• Black Ball\nGift — 70k | Boxed — 20k\n\n"
+                    "• Bubblegum Ball\nGift — 70k | Boxed — 20k\n\n"
+                    "• Red Ball\nGift — 75k | Boxed — 20k\n\n"
+                    "• Teal Ball\nGift — 75k | Boxed — 20k"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name="🚗 Vehicles",
+                value=(
+                    "• ATV\nGift — 250k | Boxed — 100k | Pink — 150k\n\n"
+                    "• Sleigh\nGift — 200k | Boxed — 50k"
+                ),
+                inline=False
+            )
+
+        embed.set_footer(
+            text="Use the buttons below to browse pages or order gifts"
+        )
+
+        return embed
+
+    @discord.ui.button(
+        label="⬅️",
+        style=discord.ButtonStyle.secondary
+    )
+    async def previous_page(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        self.page = 1
+
+        await interaction.response.edit_message(
+            embed=self.get_embed(),
+            view=self
+        )
+
+    @discord.ui.button(
+        label="🎁 Order Gifts",
+        style=discord.ButtonStyle.green
+    )
+    async def order_gifts(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        guild = interaction.guild
+
+        for channel in guild.text_channels:
+
+            if channel.name == f"gift-{interaction.user.name.lower()}":
+
+                await interaction.response.send_message(
+                    "❌ You already have an open gift ticket.",
+                    ephemeral=True
+                )
+
+                return
+
+        seller_role = discord.utils.get(
+            guild.roles,
+            name=SELLER_ROLE
+        )
+
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(
+                view_channel=False
+            ),
+
+            interaction.user: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            ),
+
+            guild.me: discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+        }
+
+        if seller_role:
+            overwrites[seller_role] = discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True
+            )
+
+        category = discord.utils.get(
+            guild.categories,
+            name=GIFT_ORDER_CATEGORY
+        )
+
+        channel = await guild.create_text_channel(
+            name=f"gift-{interaction.user.name.lower()}",
+            overwrites=overwrites,
+            category=category
+        )
+
+        embed = discord.Embed(
+            title="🎁 Gift Order",
+            description=(
+                "Please explain:\n\n"
+                "• Which gifts/items you want\n"
+                "• Gift / Boxed / Loose\n"
+                "• Quantity"
+            ),
+            color=discord.Color.magenta()
+        )
+
+        await channel.send(
+            content=f"{interaction.user.mention}",
+            embed=embed,
+            view=CloseTicketView()
+        )
+
+        await interaction.response.send_message(
+            f"✅ Gift ticket created: {channel.mention}",
+            ephemeral=True
+        )
+
+    @discord.ui.button(
+        label="➡️",
+        style=discord.ButtonStyle.secondary
+    )
+    async def next_page(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button
+    ):
+
+        self.page = 2
+
+        await interaction.response.edit_message(
+            embed=self.get_embed(),
+            view=self
+        )
+
+
+@tree.command(name="giftpanel", description="Post gift panel")
+async def giftpanel(interaction: discord.Interaction):
+
+    if not is_owner(interaction):
+        return
+
+    view = GiftPanelView(page=1)
+
+    await interaction.channel.send(
+        embed=view.get_embed(),
+        view=view
+    )
+
+    await interaction.response.send_message(
+        "✅ Gift panel posted.",
         ephemeral=True
     )
 
