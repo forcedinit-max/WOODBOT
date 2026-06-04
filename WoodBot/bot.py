@@ -1459,7 +1459,13 @@ async def axepanel(interaction: discord.Interaction):
             "Gift — 30k | Boxed — 20k | Loose — 15k\n\n"
 
             "• Frost Axe\n"
-            "Gift — 30k | Boxed — 20k | Loose — 10k"
+            "Gift — 30k | Boxed — 20k | Loose — 10k\n\n"
+            
+            "• Red Candy Cane\nGift — 45k | Boxed — 10k\n\n"
+            
+            "• Candy Cane Axe\nGift — 30k | Boxed — 20k\n\n"
+            
+            "• Spearmint Axe\nBoxed — 20k | Loose — 10k"
         ),
         inline=False
     )
@@ -1515,10 +1521,8 @@ class GiftPanelView(discord.ui.View):
             embed.add_field(
                 name="🎄 Holiday Gifts",
                 value=(
-                    "• Coal\nGift — 35k | Boxed — 25k\n\n"
-                    "• Red Candy Cane\nGift — 45k | Boxed — 10k\n\n"
-                    "• Candy Cane Axe\nGift — 30k | Boxed — 20k\n\n"
-                    "• Spearmint Axe\nBoxed — 20k | Loose — 10k"
+                    "• Coal\nGift — 35k | Boxed — 25k"
+                    
                 ),
                 inline=False
             )
