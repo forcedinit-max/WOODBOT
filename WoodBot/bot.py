@@ -891,6 +891,7 @@ async def sellerpanel(interaction: discord.Interaction):
 
 
 
+
 @tree.command(name="setup", description="Post order panel")
 async def setup(interaction: discord.Interaction):
 
@@ -911,10 +912,10 @@ async def setup(interaction: discord.Interaction):
     embed.add_field(
         name="🌳 Standard Woods",
         value=(
-            "• Oak Wood — 90k\n"
-            "• Elm Wood — 90k\n"
-            "• Cherry Wood — 90k\n"
-            "• Lava Wood — 90k"
+            "• Oak Wood — 67.5k\n"
+            "• Elm Wood — 67.5k\n"
+            "• Cherry Wood — 67.5k\n"
+            "• Lava Wood — 67.5k"
         ),
         inline=False
     )
@@ -922,12 +923,12 @@ async def setup(interaction: discord.Interaction):
     embed.add_field(
         name="🌲 Mid Tier Woods",
         value=(
-            "• Cavecrawler / Blue Neon — 115k\n"
-            "• Birch Wood — 130k\n"
-            "• Walnut Wood — 135k\n"
-            "• Pine Wood — 140k\n"
-            "• Fir Wood — 140k\n"
-            "• Koa Wood — 150k"
+            "• Cavecrawler / Blue Neon — 86.25k\n"
+            "• Birch Wood — 97.5k\n"
+            "• Walnut Wood — 101.25k\n"
+            "• Pine Wood — 105k\n"
+            "• Fir Wood — 105k\n"
+            "• Koa Wood — 112.5k"
         ),
         inline=False
     )
@@ -935,11 +936,11 @@ async def setup(interaction: discord.Interaction):
     embed.add_field(
         name="💎 Rare Woods",
         value=(
-            "• Zombie Wood — 170k\n"
-            "• Gold Wood — 170k\n"
-            "• Frost Wood — 200k\n"
-            "• Snowglow Wood — 200k\n"
-            "• Palm Wood — 220k"
+            "• Zombie Wood — 127.5k\n"
+            "• Gold Wood — 127.5k\n"
+            "• Frost Wood — 150k\n"
+            "• Snowglow Wood — 150k\n"
+            "• Palm Wood — 165k"
         ),
         inline=False
     )
@@ -947,10 +948,10 @@ async def setup(interaction: discord.Interaction):
     embed.add_field(
         name="🔥 Premium Woods",
         value=(
-            "• Blue Spruce Wood — 275k\n"
-            "• Phantom Wood — 350k\n"
-            "• Spook Wood — 400k\n"
-            "• Sinister Wood — 400k"
+            "• Blue Spruce Wood — 206.25k\n"
+            "• Phantom Wood — 262.5k\n"
+            "• Spook Wood — 300k\n"
+            "• Sinister Wood — 300k"
         ),
         inline=False
     )
@@ -959,7 +960,6 @@ async def setup(interaction: discord.Interaction):
         text="Press the button below to place an order"
     )
 
-   
     await interaction.channel.send(
         embed=embed,
         view=TicketView()
@@ -969,6 +969,8 @@ async def setup(interaction: discord.Interaction):
         "✅ Order panel posted.",
         ephemeral=True
     )
+
+
 
 
 
